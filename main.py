@@ -250,8 +250,8 @@ doLog = False
 weatherbit.start_wind_monitoring()
 weatherbit.start_weather_monitoring()
 
-#serial.redirect(SerialPin.P15, SerialPin.P14, BaudRate.BAUD_RATE9600)
-serial.redirect_to_usb()
+serial.redirect(SerialPin.P15, SerialPin.P14, BaudRate.BAUD_RATE9600)
+#serial.redirect_to_usb()
 
 """
 
@@ -273,7 +273,7 @@ def on_forever():
 #        if (temperatureC > p1.getWindSpeedThreshold()):
         current_WindSpeed = Math.round_with_precision(weatherbit.wind_speed() * 3600 / 1000,1)
         
-        if (current_WindSpeed > p1.getWindSpeedThreshold()) or (True):
+        if (current_WindSpeed > p1.getWindSpeedThreshold()): # or (True):
             doLog = True
             p1.setLogIntervalToHigh()
         elif (p1.continueLogging() == False):

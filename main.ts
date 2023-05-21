@@ -375,8 +375,8 @@ let LoggingIsOn = false
 let doLog = false
 weatherbit.startWindMonitoring()
 weatherbit.startWeatherMonitoring()
-// serial.redirect(SerialPin.P15, SerialPin.P14, BaudRate.BAUD_RATE9600)
-serial.redirectToUSB()
+serial.redirect(SerialPin.P15, SerialPin.P14, BaudRate.BaudRate9600)
+// serial.redirect_to_usb()
 /** Note: If "???" is displayed, direction is unknown! */
 function on_forever() {
     let doLog: boolean;
@@ -391,7 +391,8 @@ function on_forever() {
         //         temperatureC = (weatherbit.temperature()/ 100)
         //         if (temperatureC > p1.getWindSpeedThreshold()):
         current_WindSpeed = Math.roundWithPrecision(weatherbit.windSpeed() * 3600 / 1000, 1)
-        if (current_WindSpeed > p1.getWindSpeedThreshold() || true) {
+        if (current_WindSpeed > p1.getWindSpeedThreshold()) {
+            //  or (True):
             doLog = true
             p1.setLogIntervalToHigh()
         } else if (p1.continueLogging() == false) {
