@@ -293,8 +293,6 @@ def on_forever():
             # -------- pressure --------
             pressure = Math.round_with_precision(weatherbit.pressure()/ 25600,1)
 
-            #dataLog.writeData(current_WindSpeed, current_WindDirection_List,
-            #    tempC, humid, pressure)    
             dataLog.writeData(td.getTime(),current_WindSpeed, current_WindDirection_List,
                             tempC, humid, pressure)
         else:
