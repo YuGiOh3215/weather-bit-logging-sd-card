@@ -265,9 +265,9 @@ function show3DotsLED() {
     `)
 }
 
-function showWindLevel() {
-    
-    if (p1.getiLevel() == 0) {
+function showWindLevel(iLevel: string) {
+    serial.writeLine(iLevel)
+    if (iLevel == 0) {
         basic.showLeds(`
             . . . . .
             . . . . .
@@ -275,7 +275,7 @@ function showWindLevel() {
             . . . . .
             # # # # #
             `)
-    } else if (p1.getiLevel() == 1) {
+    } else if (iLevel == 1) {
         basic.showLeds(`
             . . . . .
             . . . . .
@@ -283,7 +283,7 @@ function showWindLevel() {
             . . . . .
             . . # . .
             `)
-    } else if (p1.getiLevel() == 2) {
+    } else if (iLevel == 2) {
         basic.showLeds(`
             . . . . .
             . . . . .
@@ -291,7 +291,7 @@ function showWindLevel() {
             . . # . .
             . . # . .
             `)
-    } else if (p1.getiLevel() == 3) {
+    } else if (iLevel == 3) {
         basic.showLeds(`
             . . . . .
             . . . . .
@@ -299,7 +299,7 @@ function showWindLevel() {
             . . # . .
             . . # . .
             `)
-    } else if (p1.getiLevel() == 4) {
+    } else if (iLevel == 4) {
         basic.showLeds(`
             . . . . .
             . . # . .
@@ -307,7 +307,7 @@ function showWindLevel() {
             . . # . .
             . . # . .
             `)
-    } else if (p1.getiLevel() == 5) {
+    } else if (iLevel == 5) {
         basic.showLeds(`
             . . # . .
             . . # . .
@@ -338,10 +338,12 @@ class dataOutput {
 }
 
 input.onButtonPressed(Button.A, function on_button_pressed_a() {
+    let iLevel: string;
     
     LoggingIsOn = !LoggingIsOn
     if (LoggingIsOn == true) {
-        showWindLevel()
+        iLevel = Math.trunc(Math.roundWithPrecision(p1.getiLevel() / 10, 0))
+        showWindLevel(iLevel)
         basic.pause(2000)
         showLoggingLED()
     } else {
@@ -358,13 +360,13 @@ input.onButtonPressed(Button.B, function on_button_pressed_b() {
         minWindSpeed = p1.getWindSpeedThreshold()
         szLine = "--------- limit " + minWindSpeed + " ---------"
         serial.writeLine(szLine)
-        showWindLevel()
-        basic.pause(2000)
-        showNotLoggingLED()
-    } else {
-        showQMarkLED()
+        showWindLevel(Math.trunc(Math.roundWithPrecision(p1.getiLevel() / 10, 0)))
         basic.pause(2000)
         showLoggingLED()
+    } else {
+        showNotLoggingLED()
+        basic.pause(2000)
+        showNotLoggingLED()
     }
     
 })
@@ -375,11 +377,10 @@ let LoggingIsOn = false
 let doLog = false
 weatherbit.startWindMonitoring()
 weatherbit.startWeatherMonitoring()
-serial.redirect(SerialPin.P15, SerialPin.P14, BaudRate.BaudRate9600)
-// serial.redirect_to_usb()
+// serial.redirect(SerialPin.P15, SerialPin.P14, BaudRate.BAUD_RATE9600)
+serial.redirectToUSB()
 /** Note: If "???" is displayed, direction is unknown! */
 function on_forever() {
-    let doLog: boolean;
     let humid: number;
     let pressure: number;
     
@@ -388,32 +389,23 @@ function on_forever() {
     let current_WindDirection_List = ""
     if (LoggingIsOn == true) {
         //  -------- wind --------
-        //         temperatureC = (weatherbit.temperature()/ 100)
-        //         if (temperatureC > p1.getWindSpeedThreshold()):
-        current_WindSpeed = Math.roundWithPrecision(weatherbit.windSpeed() * 3600 / 1000, 1)
+        current_WindSpeed = Math.roundWithPrecision(Math.random() * 25, 1)
+        //         current_WindSpeed = Math.round_with_precision(weatherbit.wind_speed() * 3600 / 1000,1)
         if (current_WindSpeed > p1.getWindSpeedThreshold()) {
-            //  or (True):
-            doLog = true
             p1.setLogIntervalToHigh()
         } else if (p1.continueLogging() == false) {
-            doLog = false
             p1.setLogIntervalToStd()
         }
         
-        if (doLog) {
-            showLoggingLED()
-            current_WindDirection_List = weatherbit.windDirection()
-            //  -------- temperature --------
-            tempC = Math.roundWithPrecision(weatherbit.temperature() / 100, 0)
-            //  -------- humidity --------
-            humid = Math.roundWithPrecision(weatherbit.humidity() / 1024, 1)
-            //  -------- pressure --------
-            pressure = Math.roundWithPrecision(weatherbit.pressure() / 25600, 1)
-            dataLog.writeData(td.getTime(), current_WindSpeed, current_WindDirection_List, tempC, humid, pressure)
-        } else {
-            show3DotsLED()
-        }
-        
+        showLoggingLED()
+        current_WindDirection_List = weatherbit.windDirection()
+        //  -------- temperature --------
+        tempC = Math.roundWithPrecision(weatherbit.temperature() / 100, 0)
+        //  -------- humidity --------
+        humid = Math.roundWithPrecision(weatherbit.humidity() / 1024, 1)
+        //  -------- pressure --------
+        pressure = Math.roundWithPrecision(weatherbit.pressure() / 25600, 1)
+        dataLog.writeData(td.getTime(), current_WindSpeed, current_WindDirection_List, tempC, humid, pressure)
     } else {
         showNotLoggingLED()
     }

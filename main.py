@@ -1,7 +1,9 @@
 import weatherbit
 import microbit
+
 from microbit import *
 from logging import *
+
 
 class TimeAndDate:
 #    Year = 2023
@@ -16,12 +18,12 @@ class TimeAndDate:
     _referenceCount = 0
 
     def __init__(self):
-        self.Count = 0  
+        self.Count = 0
         self._referenceCount = 0
 
     def start(self):
         self._referenceCount = input.running_time()
-        self.Count = 0 
+        self.Count = 0
  
     def getTime(self):
         self.Count = (input.running_time() - self._referenceCount)/1000
@@ -33,7 +35,6 @@ class TimeAndDate:
             self._refMinutes = self._refMinutes + 1
         else:
             self.Seconds = Math.round_with_precision(compare,0)
-            
 
         if (self._refMinutes >= 60):
             self._refMinutes = self._refMinutes - 60
@@ -43,7 +44,7 @@ class TimeAndDate:
             self._refHours = self._refHours - 24
 
         szLine = self.Count + " | "+ self._refHours + \
-         ':' + self._refMinutes + ':' + self.Seconds 
+         ':' + self._refMinutes + ':' + self.Seconds
         return szLine
 
 
@@ -133,10 +134,9 @@ def show3DotsLED():
         . . . . .
     """)
 
-def showWindLevel():
-    global p1
-        
-    if (p1.getiLevel() == 0):
+def showWindLevel(iLevel:int):
+    serial.write_line(iLevel)
+    if (iLevel == 0):
         basic.show_leds("""
             . . . . .
             . . . . .
@@ -144,7 +144,7 @@ def showWindLevel():
             . . . . .
             # # # # #
             """)
-    elif (p1.getiLevel() == 1):
+    elif (iLevel == 1):
         basic.show_leds("""
             . . . . .
             . . . . .
@@ -152,7 +152,7 @@ def showWindLevel():
             . . . . .
             . . # . .
             """)
-    elif (p1.getiLevel() == 2):
+    elif (iLevel == 2):
         basic.show_leds("""
             . . . . .
             . . . . .
@@ -160,7 +160,7 @@ def showWindLevel():
             . . # . .
             . . # . .
             """)
-    elif (p1.getiLevel() == 3):
+    elif (iLevel == 3):
         basic.show_leds("""
             . . . . .
             . . . . .
@@ -168,7 +168,7 @@ def showWindLevel():
             . . # . .
             . . # . .
             """)
-    elif (p1.getiLevel() == 4):
+    elif (iLevel == 4):
         basic.show_leds("""
             . . . . .
             . . # . .
@@ -176,7 +176,7 @@ def showWindLevel():
             . . # . .
             . . # . .
             """)
-    elif (p1.getiLevel() == 5):
+    elif (iLevel == 5):
         basic.show_leds("""
             . . # . .
             . . # . .
@@ -209,7 +209,8 @@ def on_button_pressed_a():
     LoggingIsOn = not (LoggingIsOn)
     
     if (LoggingIsOn == True):
-        showWindLevel()
+        iLevel = int(Math.round_with_precision(p1.getiLevel()/10,0))
+        showWindLevel(iLevel)
         basic.pause(2000)
         showLoggingLED()
     else:
@@ -226,23 +227,23 @@ def on_button_pressed_b():
         minWindSpeed = p1.getWindSpeedThreshold()
 
         szLine = '--------- limit ' + minWindSpeed + ' ---------'
-        serial.write_line(szLine)    
+        serial.write_line(szLine)
 
-        showWindLevel()
-        basic.pause(2000)
-        showNotLoggingLED()
-    else:
-        showQMarkLED()
+        showWindLevel(int(Math.round_with_precision(p1.getiLevel()/10,0)))
         basic.pause(2000)
         showLoggingLED()
+    else:
+        showNotLoggingLED()
+        basic.pause(2000)
+        showNotLoggingLED()
         
 input.on_button_pressed(Button.B, on_button_pressed_b)
 
 
 
-p1 = LoggingParams()    
-dataLog = dataOutput() 
-td = TimeAndDate() 
+p1 = LoggingParams()
+dataLog = dataOutput()
+td = TimeAndDate()
 
 LoggingIsOn = False
 doLog = False
@@ -250,8 +251,8 @@ doLog = False
 weatherbit.start_wind_monitoring()
 weatherbit.start_weather_monitoring()
 
-serial.redirect(SerialPin.P15, SerialPin.P14, BaudRate.BAUD_RATE9600)
-#serial.redirect_to_usb()
+#serial.redirect(SerialPin.P15, SerialPin.P14, BaudRate.BAUD_RATE9600)
+serial.redirect_to_usb()
 
 """
 
@@ -266,37 +267,30 @@ def on_forever():
     tempC = 0
     current_WindSpeed = 0.0
     current_WindDirection_List = ""
-
+  
     if LoggingIsOn == True:
         # -------- wind --------
-#        temperatureC = (weatherbit.temperature()/ 100)
-#        if (temperatureC > p1.getWindSpeedThreshold()):
-        current_WindSpeed = Math.round_with_precision(weatherbit.wind_speed() * 3600 / 1000,1)
+        current_WindSpeed = Math.round_with_precision(Math.random() * 25,1)
+#        current_WindSpeed = Math.round_with_precision(weatherbit.wind_speed() * 3600 / 1000,1)
         
-        if (current_WindSpeed > p1.getWindSpeedThreshold()): # or (True):
-            doLog = True
+        if (current_WindSpeed > p1.getWindSpeedThreshold()):
             p1.setLogIntervalToHigh()
         elif (p1.continueLogging() == False):
-            doLog = False
             p1.setLogIntervalToStd()
 
-        if doLog:
+        showLoggingLED()
+        current_WindDirection_List = weatherbit.wind_direction()
 
-            showLoggingLED()
-            current_WindDirection_List = weatherbit.wind_direction()
+        # -------- temperature --------
+        tempC = Math.round_with_precision((weatherbit.temperature()/ 100),0)
+        # -------- humidity --------
 
-            # -------- temperature --------
-            tempC = Math.round_with_precision((weatherbit.temperature()/ 100),0)
-            # -------- humidity --------
+        humid = Math.round_with_precision((weatherbit.humidity()/ 1024),1)
+        # -------- pressure --------
+        pressure = Math.round_with_precision(weatherbit.pressure()/ 25600,1)
 
-            humid = Math.round_with_precision((weatherbit.humidity()/ 1024),1)
-            # -------- pressure --------
-            pressure = Math.round_with_precision(weatherbit.pressure()/ 25600,1)
-
-            dataLog.writeData(td.getTime(),current_WindSpeed, current_WindDirection_List,
-                            tempC, humid, pressure)
-        else:
-            show3DotsLED()
+        dataLog.writeData(td.getTime(),current_WindSpeed, current_WindDirection_List,
+                        tempC, humid, pressure)
     else:
         showNotLoggingLED()
         
