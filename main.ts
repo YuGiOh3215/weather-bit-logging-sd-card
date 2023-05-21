@@ -128,90 +128,17 @@ class LoggingParams {
         this.___idefaultLogInterv = value
     }
     
-    static iHighLogInterv: number
-    private ___iHighLogInterv_is_set: boolean
-    private ___iHighLogInterv: number
-    get iHighLogInterv(): number {
-        return this.___iHighLogInterv_is_set ? this.___iHighLogInterv : LoggingParams.iHighLogInterv
-    }
-    set iHighLogInterv(value: number) {
-        this.___iHighLogInterv_is_set = true
-        this.___iHighLogInterv = value
-    }
-    
-    static listWindSpeed: number[]
-    private ___listWindSpeed_is_set: boolean
-    private ___listWindSpeed: number[]
-    get listWindSpeed(): number[] {
-        return this.___listWindSpeed_is_set ? this.___listWindSpeed : LoggingParams.listWindSpeed
-    }
-    set listWindSpeed(value: number[]) {
-        this.___listWindSpeed_is_set = true
-        this.___listWindSpeed = value
-    }
-    
-    private static _iCount: number
-    private ____iCount_is_set: boolean
-    private ____iCount: number
-    get _iCount(): number {
-        return this.____iCount_is_set ? this.____iCount : LoggingParams._iCount
-    }
-    set _iCount(value: number) {
-        this.____iCount_is_set = true
-        this.____iCount = value
-    }
-    
-    private _iLevel: number
     public static __initLoggingParams() {
-        LoggingParams.listWindSpeed = [0, 5, 10, 20, 40, 50]
-        LoggingParams.idefaultLogInterv = 5000
-        LoggingParams.iHighLogInterv = 1000
+        LoggingParams.idefaultLogInterv = 2000
         LoggingParams._iLogInterval = 0
-        LoggingParams._iCount = 0
     }
     
     constructor() {
-        this._iLevel = 0
         this._iLogInterval = this.idefaultLogInterv
-    }
-    
-    public getiLevel(): number {
-        return this._iLevel
     }
     
     public getLogInterval(): number {
         return this._iLogInterval
-    }
-    
-    public setLogIntervalToHigh() {
-        this._iLogInterval = this.iHighLogInterv
-    }
-    
-    public setLogIntervalToStd() {
-        this._iLogInterval = this.idefaultLogInterv
-    }
-    
-    public getWindSpeedThreshold(): number {
-        return this.listWindSpeed[this._iLevel]
-    }
-    
-    public increaseLevel() {
-        if (this._iLevel == this.listWindSpeed.length - 1) {
-            this._iLevel = 0
-        } else {
-            this._iLevel = this._iLevel + 1
-        }
-        
-    }
-    
-    public continueLogging(): boolean {
-        if (this._iCount < 20) {
-            this._iCount = this._iCount + 1
-            return true
-        } else {
-            return false
-        }
-        
     }
     
 }
@@ -248,77 +175,6 @@ function showQMarkLED() {
     `)
 }
 
-function show3DotsLED() {
-    basic.showLeds(`
-        . . . . .
-        . . . . .
-        # . # . #
-        . . . . .
-        . . . . .
-    `)
-    basic.showLeds(`
-        . . . . .
-        . . . . .
-        . # . # .
-        . . . . .
-        . . . . .
-    `)
-}
-
-function showWindLevel(iLevel: string) {
-    serial.writeLine(iLevel)
-    if (iLevel == 0) {
-        basic.showLeds(`
-            . . . . .
-            . . . . .
-            . . . . .
-            . . . . .
-            # # # # #
-            `)
-    } else if (iLevel == 1) {
-        basic.showLeds(`
-            . . . . .
-            . . . . .
-            . . . . .
-            . . . . .
-            . . # . .
-            `)
-    } else if (iLevel == 2) {
-        basic.showLeds(`
-            . . . . .
-            . . . . .
-            . . . . .
-            . . # . .
-            . . # . .
-            `)
-    } else if (iLevel == 3) {
-        basic.showLeds(`
-            . . . . .
-            . . . . .
-            . . # . .
-            . . # . .
-            . . # . .
-            `)
-    } else if (iLevel == 4) {
-        basic.showLeds(`
-            . . . . .
-            . . # . .
-            . . # . .
-            . . # . .
-            . . # . .
-            `)
-    } else if (iLevel == 5) {
-        basic.showLeds(`
-            . . # . .
-            . . # . .
-            . . # . .
-            . . # . .
-            . . # . .
-            `)
-    }
-    
-}
-
 class dataOutput {
     szLine: string
     constructor() {
@@ -326,25 +182,21 @@ class dataOutput {
     }
     
     public writeHeader() {
-        let szLine = "Time,WSP,CWD,TiC,HUM,PRESS"
-        serial.writeLine(szLine)
+        this.szLine = "Time,WSP,CWD,TiC,HUM,PRESS"
+        serial.writeLine(this.szLine)
     }
     
     public writeData(TTime: any, WSP: number, CWD: string, TiC: number, HUM: number, PRESS: number) {
-        let szLine = TTime + "," + WSP + "," + CWD + "," + TiC + "," + HUM + "," + PRESS
-        serial.writeLine(szLine)
+        this.szLine = TTime + "," + WSP + "," + CWD + "," + TiC + "," + HUM + "," + PRESS
+        serial.writeLine(this.szLine)
     }
     
 }
 
 input.onButtonPressed(Button.A, function on_button_pressed_a() {
-    let iLevel: string;
     
     LoggingIsOn = !LoggingIsOn
     if (LoggingIsOn == true) {
-        iLevel = Math.trunc(Math.roundWithPrecision(p1.getiLevel() / 10, 0))
-        showWindLevel(iLevel)
-        basic.pause(2000)
         showLoggingLED()
     } else {
         showNotLoggingLED()
@@ -352,33 +204,16 @@ input.onButtonPressed(Button.A, function on_button_pressed_a() {
     
 })
 input.onButtonPressed(Button.B, function on_button_pressed_b() {
-    let minWindSpeed: number;
-    let szLine: string;
-    
-    if (LoggingIsOn == false) {
-        p1.increaseLevel()
-        minWindSpeed = p1.getWindSpeedThreshold()
-        szLine = "--------- limit " + minWindSpeed + " ---------"
-        serial.writeLine(szLine)
-        showWindLevel(Math.trunc(Math.roundWithPrecision(p1.getiLevel() / 10, 0)))
-        basic.pause(2000)
-        showLoggingLED()
-    } else {
-        showNotLoggingLED()
-        basic.pause(2000)
-        showNotLoggingLED()
-    }
-    
+    showQMarkLED()
 })
 let p1 = new LoggingParams()
 let dataLog = new dataOutput()
 let td = new TimeAndDate()
 let LoggingIsOn = false
-let doLog = false
 weatherbit.startWindMonitoring()
 weatherbit.startWeatherMonitoring()
-// serial.redirect(SerialPin.P15, SerialPin.P14, BaudRate.BAUD_RATE9600)
-serial.redirectToUSB()
+serial.redirect(SerialPin.P15, SerialPin.P14, BaudRate.BaudRate9600)
+// serial.redirect_to_usb()
 /** Note: If "???" is displayed, direction is unknown! */
 function on_forever() {
     let humid: number;
@@ -389,15 +224,7 @@ function on_forever() {
     let current_WindDirection_List = ""
     if (LoggingIsOn == true) {
         //  -------- wind --------
-        current_WindSpeed = Math.roundWithPrecision(Math.random() * 25, 1)
-        //         current_WindSpeed = Math.round_with_precision(weatherbit.wind_speed() * 3600 / 1000,1)
-        if (current_WindSpeed > p1.getWindSpeedThreshold()) {
-            p1.setLogIntervalToHigh()
-        } else if (p1.continueLogging() == false) {
-            p1.setLogIntervalToStd()
-        }
-        
-        showLoggingLED()
+        current_WindSpeed = Math.roundWithPrecision(weatherbit.windSpeed() * 3600 / 1000, 2)
         current_WindDirection_List = weatherbit.windDirection()
         //  -------- temperature --------
         tempC = Math.roundWithPrecision(weatherbit.temperature() / 100, 0)

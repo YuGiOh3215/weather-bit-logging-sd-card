@@ -49,46 +49,16 @@ class TimeAndDate:
 
 
 class LoggingParams:
-    listWindSpeed = [0, 5, 10, 20, 40, 50]
-    idefaultLogInterv = 5000
-    iHighLogInterv = 1000
+    idefaultLogInterv = 2000
     _iLogInterval = 0
-    _iCount = 0
-
+    
     def __init__(self):
 
-        self._iLevel = 0
         self._iLogInterval = self.idefaultLogInterv
-
-    def getiLevel(self):
-        return self._iLevel
 
     def getLogInterval(self):
         return (self._iLogInterval)
 
-    def setLogIntervalToHigh(self):
-        self._iLogInterval = self.iHighLogInterv
- 
-    def setLogIntervalToStd(self):
-         self._iLogInterval = self.idefaultLogInterv
-
-    def getWindSpeedThreshold(self):
-        return (self.listWindSpeed[self._iLevel])
-
-    def increaseLevel(self):
-        
-        if self._iLevel == (len(self.listWindSpeed)-1):
-            self._iLevel = 0
-        else:
-            self._iLevel = self._iLevel + 1
-
-    def continueLogging(self):
-        if (self._iCount < 20):
-            self._iCount = self._iCount + 1
-            return True
-        else:
-            return False
-        
 
 def showLoggingLED():
     basic.show_leds("""
@@ -118,90 +88,24 @@ def showQMarkLED():
         . . # . .
     """)
 
-def show3DotsLED():
-    basic.show_leds("""
-        . . . . .
-        . . . . .
-        # . # . #
-        . . . . .
-        . . . . .
-    """)
-    basic.show_leds("""
-        . . . . .
-        . . . . .
-        . # . # .
-        . . . . .
-        . . . . .
-    """)
-
-def showWindLevel(iLevel:int):
-    serial.write_line(iLevel)
-    if (iLevel == 0):
-        basic.show_leds("""
-            . . . . .
-            . . . . .
-            . . . . .
-            . . . . .
-            # # # # #
-            """)
-    elif (iLevel == 1):
-        basic.show_leds("""
-            . . . . .
-            . . . . .
-            . . . . .
-            . . . . .
-            . . # . .
-            """)
-    elif (iLevel == 2):
-        basic.show_leds("""
-            . . . . .
-            . . . . .
-            . . . . .
-            . . # . .
-            . . # . .
-            """)
-    elif (iLevel == 3):
-        basic.show_leds("""
-            . . . . .
-            . . . . .
-            . . # . .
-            . . # . .
-            . . # . .
-            """)
-    elif (iLevel == 4):
-        basic.show_leds("""
-            . . . . .
-            . . # . .
-            . . # . .
-            . . # . .
-            . . # . .
-            """)
-    elif (iLevel == 5):
-        basic.show_leds("""
-            . . # . .
-            . . # . .
-            . . # . .
-            . . # . .
-            . . # . .
-            """)
-    
+   
 class dataOutput:
     def __init__(self):
         self.szLine = ""
 
     def writeHeader(self):
-        szLine = 'Time,WSP,CWD,TiC,HUM,PRESS'
-        serial.write_line(szLine)
+        self.szLine = 'Time,WSP,CWD,TiC,HUM,PRESS'
+        serial.write_line(self.szLine)
 
     def writeData(self,TTime, WSP, CWD, TiC, HUM, PRESS):
-        szLine = TTime + ',' + \
+        self.szLine = TTime + ',' + \
             WSP + ',' + \
             CWD + ',' + \
             TiC + ',' + \
             HUM + ',' + \
             PRESS
 
-        serial.write_line(szLine)
+        serial.write_line(self.szLine)
 
 
 def on_button_pressed_a():
@@ -209,9 +113,6 @@ def on_button_pressed_a():
     LoggingIsOn = not (LoggingIsOn)
     
     if (LoggingIsOn == True):
-        iLevel = int(Math.round_with_precision(p1.getiLevel()/10,0))
-        showWindLevel(iLevel)
-        basic.pause(2000)
         showLoggingLED()
     else:
         showNotLoggingLED()
@@ -219,23 +120,8 @@ def on_button_pressed_a():
 input.on_button_pressed(Button.A, on_button_pressed_a)
 
 def on_button_pressed_b():
-    global p1
     
-    if LoggingIsOn == False:
-        p1.increaseLevel()
-        
-        minWindSpeed = p1.getWindSpeedThreshold()
-
-        szLine = '--------- limit ' + minWindSpeed + ' ---------'
-        serial.write_line(szLine)
-
-        showWindLevel(int(Math.round_with_precision(p1.getiLevel()/10,0)))
-        basic.pause(2000)
-        showLoggingLED()
-    else:
-        showNotLoggingLED()
-        basic.pause(2000)
-        showNotLoggingLED()
+    showQMarkLED()
         
 input.on_button_pressed(Button.B, on_button_pressed_b)
 
@@ -246,13 +132,12 @@ dataLog = dataOutput()
 td = TimeAndDate()
 
 LoggingIsOn = False
-doLog = False
 
 weatherbit.start_wind_monitoring()
 weatherbit.start_weather_monitoring()
 
-#serial.redirect(SerialPin.P15, SerialPin.P14, BaudRate.BAUD_RATE9600)
-serial.redirect_to_usb()
+serial.redirect(SerialPin.P15, SerialPin.P14, BaudRate.BAUD_RATE9600)
+#serial.redirect_to_usb()
 
 """
 
@@ -270,15 +155,8 @@ def on_forever():
   
     if LoggingIsOn == True:
         # -------- wind --------
-        current_WindSpeed = Math.round_with_precision(Math.random() * 25,1)
-#        current_WindSpeed = Math.round_with_precision(weatherbit.wind_speed() * 3600 / 1000,1)
+        current_WindSpeed = Math.round_with_precision(weatherbit.wind_speed() * 3600 / 1000,2)
         
-        if (current_WindSpeed > p1.getWindSpeedThreshold()):
-            p1.setLogIntervalToHigh()
-        elif (p1.continueLogging() == False):
-            p1.setLogIntervalToStd()
-
-        showLoggingLED()
         current_WindDirection_List = weatherbit.wind_direction()
 
         # -------- temperature --------

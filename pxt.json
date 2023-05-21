@@ -1,5 +1,5 @@
 {
-    "name": "Weather Bit Logging SD Card",
+    "name": "MinWeather Bit Logging SD Card",
     "description": "",
     "dependencies": {
         "core": "*",
