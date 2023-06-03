@@ -43,7 +43,7 @@ class TimeAndDate:
         if (self._refHours >= 24):
             self._refHours = self._refHours - 24
 
-        szLine = self.Count + " | "+ self._refHours + \
+        szLine = self.Count + "\t"+ self._refHours + \
          ':' + self._refMinutes + ':' + self.Seconds
         return szLine
 
@@ -94,16 +94,16 @@ class dataOutput:
         self.szLine = ""
 
     def writeHeader(self):
-        self.szLine = 'Time,WSP,CWD,TiC,HUM,PRESS'
+        self.szLine = 'Time\tTiC\tHUM\tPRESS\tWSP\tCWD'
         serial.write_line(self.szLine)
 
-    def writeData(self,TTime, WSP, CWD, TiC, HUM, PRESS):
-        self.szLine = TTime + ',' + \
-            WSP + ',' + \
-            CWD + ',' + \
-            TiC + ',' + \
-            HUM + ',' + \
-            PRESS
+    def writeData(self,TTime, TiC, HUM, PRESS, WSP, CWD):
+        self.szLine = TTime + '\t' + \
+            TiC + '\t' + \
+            HUM + '\t' + \
+            PRESS + '\t' + \
+            WSP + '\t' + \
+            CWD 
 
         serial.write_line(self.szLine)
 
@@ -159,6 +159,11 @@ def on_forever():
         
         current_WindDirection_List = weatherbit.wind_direction()
 
+#        soilTemperature = Math.round_with_precision(weatherbit.soil_temperature(),1)
+#        soilHumid = Math.round_with_precision(weatherbit.soil_moisture(),1)
+#        altitude = Math.round_with_precision(weatherbit.altitude(),1)
+#        rain = Math.round_with_precision(weatherbit.rain(),1)
+
         # -------- temperature --------
         tempC = Math.round_with_precision((weatherbit.temperature()/ 100),0)
         # -------- humidity --------
@@ -167,8 +172,10 @@ def on_forever():
         # -------- pressure --------
         pressure = Math.round_with_precision(weatherbit.pressure()/ 25600,1)
 
-        dataLog.writeData(td.getTime(),current_WindSpeed, current_WindDirection_List,
-                        tempC, humid, pressure)
+        dataLog.writeData(td.getTime(), 
+                        tempC, humid, 
+                        pressure, current_WindSpeed, 
+                        current_WindDirection_List,) #, rain, altitude, soilHumid, soilTemperature)
     else:
         showNotLoggingLED()
         

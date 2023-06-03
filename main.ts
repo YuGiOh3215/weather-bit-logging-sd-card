@@ -97,7 +97,7 @@ class TimeAndDate {
             this._refHours = this._refHours - 24
         }
         
-        let szLine = this.Count + " | " + this._refHours + ":" + this._refMinutes + ":" + this.Seconds
+        let szLine = this.Count + "\t" + this._refHours + ":" + this._refMinutes + ":" + this.Seconds
         return szLine
     }
     
@@ -182,12 +182,12 @@ class dataOutput {
     }
     
     public writeHeader() {
-        this.szLine = "Time,WSP,CWD,TiC,HUM,PRESS"
+        this.szLine = "Time\tTiC\tHUM\tPRESS\tWSP\tCWD"
         serial.writeLine(this.szLine)
     }
     
-    public writeData(TTime: any, WSP: number, CWD: string, TiC: number, HUM: number, PRESS: number) {
-        this.szLine = TTime + "," + WSP + "," + CWD + "," + TiC + "," + HUM + "," + PRESS
+    public writeData(TTime: any, TiC: number, HUM: number, PRESS: number, WSP: number, CWD: string) {
+        this.szLine = TTime + "\t" + TiC + "\t" + HUM + "\t" + PRESS + "\t" + WSP + "\t" + CWD
         serial.writeLine(this.szLine)
     }
     
@@ -226,14 +226,19 @@ function on_forever() {
         //  -------- wind --------
         current_WindSpeed = Math.roundWithPrecision(weatherbit.windSpeed() * 3600 / 1000, 2)
         current_WindDirection_List = weatherbit.windDirection()
+        //         soilTemperature = Math.round_with_precision(weatherbit.soil_temperature(),1)
+        //         soilHumid = Math.round_with_precision(weatherbit.soil_moisture(),1)
+        //         altitude = Math.round_with_precision(weatherbit.altitude(),1)
+        //         rain = Math.round_with_precision(weatherbit.rain(),1)
         //  -------- temperature --------
         tempC = Math.roundWithPrecision(weatherbit.temperature() / 100, 0)
         //  -------- humidity --------
         humid = Math.roundWithPrecision(weatherbit.humidity() / 1024, 1)
         //  -------- pressure --------
         pressure = Math.roundWithPrecision(weatherbit.pressure() / 25600, 1)
-        dataLog.writeData(td.getTime(), current_WindSpeed, current_WindDirection_List, tempC, humid, pressure)
+        dataLog.writeData(td.getTime(), tempC, humid, pressure, current_WindSpeed, current_WindDirection_List)
     } else {
+        // , rain, altitude, soilHumid, soilTemperature)
         showNotLoggingLED()
     }
     
