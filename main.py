@@ -94,14 +94,15 @@ class dataOutput:
         self.szLine = ""
 
     def writeHeader(self):
-        self.szLine = 'Time\tTiC\tHUM\tPRESS\tWSP\tCWD'
+        self.szLine = 'Time\tTiC\tHUM\tPRESS\tRAIN\tWSP\tCWD'
         serial.write_line(self.szLine)
 
-    def writeData(self,TTime, TiC, HUM, PRESS, WSP, CWD):
+    def writeData(self,TTime, TiC, HUM, PRESS, RAIN, WSP, CWD):
         self.szLine = TTime + '\t' + \
             TiC + '\t' + \
             HUM + '\t' + \
             PRESS + '\t' + \
+            RAIN + '\t' + \
             WSP + '\t' + \
             CWD 
 
@@ -162,7 +163,7 @@ def on_forever():
 #        soilTemperature = Math.round_with_precision(weatherbit.soil_temperature(),1)
 #        soilHumid = Math.round_with_precision(weatherbit.soil_moisture(),1)
 #        altitude = Math.round_with_precision(weatherbit.altitude(),1)
-#        rain = Math.round_with_precision(weatherbit.rain(),1)
+        rain = Math.round_with_precision(weatherbit.rain(),1)
 
         # -------- temperature --------
         tempC = Math.round_with_precision((weatherbit.temperature()/ 100),0)
@@ -174,7 +175,8 @@ def on_forever():
 
         dataLog.writeData(td.getTime(), 
                         tempC, humid, 
-                        pressure, current_WindSpeed, 
+                        pressure, rain, 
+                        current_WindSpeed, 
                         current_WindDirection_List,) #, rain, altitude, soilHumid, soilTemperature)
     else:
         showNotLoggingLED()
