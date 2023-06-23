@@ -128,10 +128,6 @@ td = TimeAndDate()
 
 LoggingIsOn = False
 
-#weatherbit.start_wind_monitoring()
-#weatherbit.start_weather_monitoring()
-
-#serial.redirect(SerialPin.P15, SerialPin.P14, BaudRate.BAUD_RATE9600)
 serial.redirect_to_usb()
 
 """
@@ -145,27 +141,16 @@ def on_forever():
     global p1, dataLog, td
      
     tempC = 0
-#    current_WindSpeed = 0.0
-#    current_WindDirection_List = ""
   
     if LoggingIsOn == True:
         # -------- wind --------
-#        current_WindSpeed = Math.round_with_precision(weatherbit.wind_speed() * 3600 / 1000,2)
-        
-#        current_WindDirection_List = weatherbit.wind_direction()
-
-#        soilTemperature = Math.round_with_precision(weatherbit.soil_temperature(),1)
-#        soilHumid = Math.round_with_precision(weatherbit.soil_moisture(),1)
-#        altitude = Math.round_with_precision(weatherbit.altitude(),1)
-#        rain = Math.round_with_precision(weatherbit.rain(),1)
 
         # -------- temperature --------
-        tempC = Math.round_with_precision((temperature()/ 100),0)
+#        tempC = Math.round_with_precision((temperature()/ 100),0)
+        tempC = temperature()
         # -------- humidity --------
 
-#        humid = Math.round_with_precision((weatherbit.humidity()/ 1024),1)
         # -------- pressure --------
-#        pressure = Math.round_with_precision(weatherbit.pressure()/ 25600,1)
 
         dataLog.writeData(td.getTime(), tempC)
     else:
