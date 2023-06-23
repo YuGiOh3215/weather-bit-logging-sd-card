@@ -212,8 +212,8 @@ let td = new TimeAndDate()
 let LoggingIsOn = false
 weatherbit.startWindMonitoring()
 weatherbit.startWeatherMonitoring()
-serial.redirect(SerialPin.P15, SerialPin.P14, BaudRate.BaudRate9600)
-// serial.redirect_to_usb()
+// serial.redirect(SerialPin.P15, SerialPin.P14, BaudRate.BAUD_RATE9600)
+serial.redirectToUSB()
 /** Note: If "???" is displayed, direction is unknown! */
 function on_forever() {
     let rain: number;

@@ -1,5 +1,5 @@
 {
-    "name": "MinWeather Bit Logging SD Card",
+    "name": "TemperatureOnlyLoggingToUSB",
     "description": "",
     "dependencies": {
         "core": "*",
@@ -20,7 +20,7 @@
         "branch": "v1.2.13",
         "tag": "v1.2.13",
         "commits": "https://github.com/Microsoft/pxt-microbit/commits/5d5b348757b15c6d00f5b7f560fd69592ca29424",
-        "target": "5.0.12",
+        "target": "6.0.8",
         "pxt": "4.4.7",
         "targetId": "microbit"
     },
